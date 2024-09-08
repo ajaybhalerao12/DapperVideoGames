@@ -44,15 +44,13 @@ namespace DapperVideoGames.Repositories
             await connection.ExecuteAsync(query, game);
         }
 
-        // NOTE:  we would risk SQL injection attacks.
         public async Task UpdateAsync(VideoGame videoGame)
         {
             var query = @"
                 UPDATE ""VideoGames"" 
                 SET Title = @Title, Publisher = @Publisher, Developer = @Developer, ReleaseDate = @ReleaseDate 
                 WHERE Id = @Id";
-            using var connection = GetConnection();
-            int v = await connection.ExecuteAsync(query, videoGame);            
+            using var connection = GetConnection();           
         }
         public async Task DeleteAsycn(int id)
         {
