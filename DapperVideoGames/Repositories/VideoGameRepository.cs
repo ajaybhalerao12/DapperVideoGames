@@ -16,37 +16,53 @@ namespace DapperVideoGames.Repositories
             _configuration = configuration;
             _connectionString= _configuration.GetConnectionString("DefaultConnection");
         }
-
-        private IDbConnection GetConnection() =>
-            new NpgsqlConnection(_connectionString);
-
+       
         public async Task<List<VideoGame>> GetAllAsync()
         {
-            var query = "SELECT* FROM \"VideoGames\"";
+            var query = "SELECT * FROM \"VideoGames\"";
             using var connection = GetConnection();
             var videos = await connection
                  .QueryAsync<VideoGame>(query);
             return videos.ToList();
         }
 
-        public Task<VideoGame> GetByIdAsync()
-        {
-            throw new NotImplementedException();
+        public async Task<VideoGame> GetByIdAsync(int id)
+        {            
+            using var connection = GetConnection();
+            const string query = @"SELECT * FROM ""VideoGames"" WHERE Id = @Id";
+            var videoGame = await connection
+                .QueryFirstOrDefaultAsync<VideoGame>(query, new { Id = id });
+            return videoGame;
         }
 
         public async Task AddAsycn(VideoGame game)
         {
+            using var connection = GetConnection();            
+            var query = @"Insert into ""VideoGames""(Id,Title,Publisher,Developer,ReleaseDate) 
+                        Values(@Id,@Title,@Publisher,@Developer,@ReleaseDate)";
 
-            throw new NotImplementedException();
+            await connection.ExecuteAsync(query, game);
         }
 
-        public Task UpdateAsync(VideoGame game)
+        // NOTE:  we would risk SQL injection attacks.
+        public async Task UpdateAsync(VideoGame videoGame)
         {
-            throw new NotImplementedException();
+            var query = @"
+                UPDATE ""VideoGames"" 
+                SET Title = @Title, Publisher = @Publisher, Developer = @Developer, ReleaseDate = @ReleaseDate 
+                WHERE Id = @Id";
+            using var connection = GetConnection();
+            int v = await connection.ExecuteAsync(query, videoGame);            
         }
-        public Task DeleteAsycn(int id)
+        public async Task DeleteAsycn(int id)
         {
-            throw new NotImplementedException();
+            var query = @"DELETE FROM ""VideoGames"" 
+                        WHERE Id = @Id";
+            using var connection = GetConnection();
+            await connection.ExecuteAsync(query, new { Id = id });
         }
+        private IDbConnection GetConnection() =>
+           new NpgsqlConnection(_connectionString);
+
     }
 }

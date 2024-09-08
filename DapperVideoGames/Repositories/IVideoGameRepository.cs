@@ -6,7 +6,7 @@ namespace DapperVideoGames.Repositories
     {
         Task<List<VideoGame>> GetAllAsync();
 
-        Task<VideoGame> GetByIdAsync();
+        Task<VideoGame> GetByIdAsync(int id);
 
         Task AddAsycn(VideoGame game);
 
